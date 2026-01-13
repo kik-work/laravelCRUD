@@ -10,7 +10,7 @@ class SmartphoneController extends Controller
     // Get all smartphones
     public function index()
     {
-        return Smartphone::all();
+        return Smartphone::get();
     }
 
     // Get a single smartphone
