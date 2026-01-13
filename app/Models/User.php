@@ -9,5 +9,5 @@ class User extends Model
 {
     use SoftDeletes; // ✅ enable soft delete
 
-    protected $fillable = ['name', 'email'];
+    protected $fillable = ['name', 'email', 'password'];
 }

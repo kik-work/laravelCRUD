@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SignupController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SmartphoneController;
 use App\Models\Smartphone;
@@ -74,3 +75,6 @@ Route::prefix('admin')
 Route::get('/test-route-name', function () {
     return route('admin.users.index');
 });
+
+
+Route::post ('/signup', [SignupController::class, 'register']);
