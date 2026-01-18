@@ -38,12 +38,12 @@ Route::prefix('smartphones')->group(function () {
 
 
 
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{id}', [ProductController::class, 'show']);
-Route::post('/products', [ProductController::class, 'store']);
-Route::put('/products/{id}', [ProductController::class, 'update']);
-Route::patch('/products/{id}', [ProductController::class, 'update']);
-Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+// Route::get('/products', [ProductController::class, 'index']);
+// Route::get('/products/{id}', [ProductController::class, 'show']);
+// Route::post('/products', [ProductController::class, 'store']);
+// Route::put('/products/{id}', [ProductController::class, 'update']);
+// Route::patch('/products/{id}', [ProductController::class, 'update']);
+// Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 Route::get('/users/{user}/orders/{order}', function ($user, $order) {
     return response()->json(compact('user', 'order'));
 });
@@ -77,4 +77,12 @@ Route::get('/test-route-name', function () {
 });
 
 
-Route::post ('/signup', [SignupController::class, 'register']);
+Route::post('/signup', [SignupController::class, 'register']);
+
+Route::prefix('v1')->group(function () {
+    Route::get('/products', [ProductController::class, 'index'])->name('product.index');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('product.show');
+    Route::post('/products', [ProductController::class, 'store'])->name('product.store');
+    Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('product.update');
+    Route::delete('/products/{product_id}',[ProductController::class, 'destroy'])->name('product.destory');
+});
