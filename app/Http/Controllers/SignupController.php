@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 class SignupController extends Controller
 {
     public function index(){
-        $user = User::with('smartphone')->find(1);
+        $user = User::get();
         return response()->json([
             'success' => true,
             'message' => 'User data retrieved successfully',

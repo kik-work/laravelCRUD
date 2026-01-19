@@ -3,9 +3,11 @@
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SignupController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SmartphoneController;
+use App\Http\Controllers\UserController;
 use App\Models\Smartphone;
 
 Route::prefix('smartphones')->group(function () {
@@ -86,8 +88,17 @@ Route::prefix('v1')->group(function () {
     //auth routes
     Route::prefix('auth')->group(function () {
         Route::post('/signup', [SignupController::class, 'register'])->name('auth.register');
-        Route::get('/users', [SignupController::class, 'index'])->name('auth.index');
+        
     });
+    Route::prefix('rbac')->group(function(){
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/user/{user_id}', [UserController::class, 'show'])->name('user.show');
+        Route::get('/roles',[RoleController::class, 'index'])->name('roles.index');
+        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::post('/user/{user_id}/role/{role_id}/attach',[UserController::class, 'attachStoreRoles'])->name('attach.user.roles.store');
+        Route::post('/user/{user_id}/role/{role_id}/detach',[UserController::class, 'detachStoreRoles'])->name('detach.user.roles.store');
+        Route::post('/user/{user_id}/role', [UserController::class, 'syncStoreRoles'])->name('sync.user.role.store');
+        });
     //product routes
     Route::prefix('prod')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('product.index');
