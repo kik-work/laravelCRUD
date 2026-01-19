@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SignupController;
 use Illuminate\Support\Facades\Route;
@@ -81,13 +83,27 @@ Route::get('/test-route-name', function () {
 
 
 Route::prefix('v1')->group(function () {
+    //auth routes
     Route::prefix('auth')->group(function () {
         Route::post('/signup', [SignupController::class, 'register'])->name('auth.register');
         Route::get('/users', [SignupController::class, 'index'])->name('auth.index');
     });
-    Route::get('/products', [ProductController::class, 'index'])->name('product.index');
-    Route::get('/products/{product}', [ProductController::class, 'show'])->name('product.show');
-    Route::post('/products', [ProductController::class, 'store'])->name('product.store');
-    Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('product.update');
-    Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('product.destory');
+    //product routes
+    Route::prefix('prod')->group(function () {
+        Route::get('/products', [ProductController::class, 'index'])->name('product.index');
+        Route::get('/products/{product}', [ProductController::class, 'show'])->name('product.show');
+        Route::post('/products', [ProductController::class, 'store'])->name('product.store');
+        Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('product.update');
+        Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('product.destory');
+    });
+
+    //blog routes
+    Route::prefix('blog')->group(function () {
+        Route::get('/posts', [PostController::class, 'index'])->name('post.index');
+        Route::get('/post/{id}',[PostController::class, 'show'])->name('post.show');
+        Route::post('/posts', [PostController::class, 'store'])->name('post.store');
+        Route::get('/comments', [CommentController::class, 'index'])->name('comment.index');
+        Route::post('/comments', [CommentController::class, 'store'])->name('comment.store');
+        Route::get('/comment/{id}',[CommentController::class, 'show'])->name('comment.show');
+    });
 });
