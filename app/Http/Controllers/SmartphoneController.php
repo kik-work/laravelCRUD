@@ -10,7 +10,12 @@ class SmartphoneController extends Controller
     // Get all smartphones
     public function index()
     {
-        return Smartphone::get();
+        $smartphone = Smartphone::with('user')->get();
+        return response()->json([
+            'success' => true,
+            'message' => 'Phones data retrieved successfully',
+            'data' => $smartphone,
+        ], 200);
     }
 
     // Get a single smartphone
@@ -23,6 +28,7 @@ class SmartphoneController extends Controller
     {
 
         $validated = $request->validate([
+            'user_id'=> 'required|integer',
             'name' => 'required|string|max:255',
             'brand' => 'required|string|max:255',
             'ram' => 'required|integer',

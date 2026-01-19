@@ -7,7 +7,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Model
 {
-    use SoftDeletes; // ✅ enable soft delete
+    use SoftDeletes;
 
     protected $fillable = ['name', 'email', 'password'];
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'email_verified_at',
+    ];
+
+    public function smartphone()
+    {
+        return $this->hasOne(Smartphone::class);
+    }
 }

@@ -77,12 +77,17 @@ Route::get('/test-route-name', function () {
 });
 
 
-Route::post('/signup', [SignupController::class, 'register']);
+
+
 
 Route::prefix('v1')->group(function () {
+    Route::prefix('auth')->group(function () {
+        Route::post('/signup', [SignupController::class, 'register'])->name('auth.register');
+        Route::get('/users', [SignupController::class, 'index'])->name('auth.index');
+    });
     Route::get('/products', [ProductController::class, 'index'])->name('product.index');
     Route::get('/products/{product}', [ProductController::class, 'show'])->name('product.show');
     Route::post('/products', [ProductController::class, 'store'])->name('product.store');
     Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('product.update');
-    Route::delete('/products/{product_id}',[ProductController::class, 'destroy'])->name('product.destory');
+    Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('product.destory');
 });

@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Hash;
 
 class SignupController extends Controller
 {
+    public function index(){
+        $user = User::with('smartphone')->find(1);
+        return response()->json([
+            'success' => true,
+            'message' => 'User data retrieved successfully',
+            'data' => $user,
+        ], 200);
+    }
     public function register(RegisterUserRequest $request){
          $user = User::create([
             'name' => $request->name,
