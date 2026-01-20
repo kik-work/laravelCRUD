@@ -124,7 +124,12 @@ Route::prefix('v1')->group(function () {
 Route::post('/login', [LoginController::class, 'login'])->name('login.store');
 
 // Admin routes
-Route::middleware(['auth', 'role:admin'])->group(function () {
+// Route::middleware(['auth', 'role:admin'])->group(function () {
+//     Route::get('/admin', function () {
+//         return 'Admin dashboard';
+//     });
+// });
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/admin', function () {
         return 'Admin dashboard';
     });
