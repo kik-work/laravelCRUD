@@ -30,7 +30,6 @@ class PostRequest extends FormRequest
          return [
             'post_title.required' => 'Please enter post_title!',
             'post_summary.required' => 'post summary is mandatory!',
-           
-        ];
+           ];
     }
 }

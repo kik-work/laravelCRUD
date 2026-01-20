@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
@@ -88,17 +89,16 @@ Route::prefix('v1')->group(function () {
     //auth routes
     Route::prefix('auth')->group(function () {
         Route::post('/signup', [SignupController::class, 'register'])->name('auth.register');
-        
     });
-    Route::prefix('rbac')->group(function(){
+    Route::prefix('rbac')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/user/{user_id}', [UserController::class, 'show'])->name('user.show');
-        Route::get('/roles',[RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-        Route::post('/user/{user_id}/role/{role_id}/attach',[UserController::class, 'attachStoreRoles'])->name('attach.user.roles.store');
-        Route::post('/user/{user_id}/role/{role_id}/detach',[UserController::class, 'detachStoreRoles'])->name('detach.user.roles.store');
+        Route::post('/user/{user_id}/role/{role_id}/attach', [UserController::class, 'attachStoreRoles'])->name('attach.user.roles.store');
+        Route::post('/user/{user_id}/role/{role_id}/detach', [UserController::class, 'detachStoreRoles'])->name('detach.user.roles.store');
         Route::post('/user/{user_id}/role', [UserController::class, 'syncStoreRoles'])->name('sync.user.role.store');
-        });
+    });
     //product routes
     Route::prefix('prod')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('product.index');
@@ -111,10 +111,21 @@ Route::prefix('v1')->group(function () {
     //blog routes
     Route::prefix('blog')->group(function () {
         Route::get('/posts', [PostController::class, 'index'])->name('post.index');
-        Route::get('/post/{id}',[PostController::class, 'show'])->name('post.show');
+        Route::get('/post/{id}', [PostController::class, 'show'])->name('post.show');
         Route::post('/posts', [PostController::class, 'store'])->name('post.store');
         Route::get('/comments', [CommentController::class, 'index'])->name('comment.index');
         Route::post('/comments', [CommentController::class, 'store'])->name('comment.store');
-        Route::get('/comment/{id}',[CommentController::class, 'show'])->name('comment.show');
+        Route::get('/comment/{id}', [CommentController::class, 'show'])->name('comment.show');
+    });
+});
+
+// Public login route
+
+Route::post('/login', [LoginController::class, 'login'])->name('login.store');
+
+// Admin routes
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin', function () {
+        return 'Admin dashboard';
     });
 });
