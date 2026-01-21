@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
@@ -94,6 +95,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/user/{user_id}', [UserController::class, 'show'])->name('user.show');
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('/role/{id}', [RoleController::class, 'show'])->name('roles.show');
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
         Route::post('/user/{user_id}/role/{role_id}/attach', [UserController::class, 'attachStoreRoles'])->name('attach.user.roles.store');
         Route::post('/user/{user_id}/role/{role_id}/detach', [UserController::class, 'detachStoreRoles'])->name('detach.user.roles.store');
@@ -130,7 +132,13 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.store');
 //     });
 // });
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+
     Route::get('/admin', function () {
         return 'Admin dashboard';
     });
+    Route::get('/permissions', [PermissionController::class, 'index'])->name('rolespermissions.index');
+    Route::post('/permissions', [PermissionController::class, 'store'])->name('rolespermissions.store');
+    Route::patch('/permission/{id}', [PermissionController::class, 'update'])->name('rolespermissions.update');
+    Route::post('/role/{role_id}/permissions/sync', [PermissionController::class, 'syncwithoutdetach'])->name('rolespermissions.sync');
+    Route::post('/role/{role_id}/permissions/detach', [PermissionController::class, 'detach'])->name('rolespermissions.detach');
 });

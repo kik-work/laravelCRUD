@@ -19,7 +19,8 @@ class LoginController extends Controller
         }
         /** @var \App\Models\User $user */
 
-        $user = Auth::user();
+        $user = Auth::user(); 
+        $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
         // Role-based redirect (or response)
         if ($user->hasRole('admin')) {

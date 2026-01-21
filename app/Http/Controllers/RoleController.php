@@ -29,4 +29,20 @@ class RoleController extends Controller
             'data'    => $role
         ]);
     }
+    public function show($id)
+    {
+
+        $role = Role::with('permissions')->find($id);
+        if (!$role) {
+            return response()->json([
+                'error' => true,
+                'message' => "Unable to find out Role id:{$id}"
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "Role with permission data fetched",
+            'data' => $role
+        ]);
+    }
 }

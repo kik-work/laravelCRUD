@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'login',
             'admin',
+            '/permissions',
+            '/permission/*',
+            '/role/*/permissions/detach',
+            '/role/*/permissions/sync',
+            '/roles/*/permissions',
             'v1/*',
             'smartphones/*',
         ]);
