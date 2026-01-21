@@ -79,7 +79,7 @@ class PermissionController extends Controller
             "message" => "Role ID {$role_id} has been added with permission Ids: " . implode(',', $validation['permission_id']),
         ]);
     }
-      public function detach(Request $request, $role_id)
+    public function detach(Request $request, $role_id)
     {
         $validation = $request->validate([
             'permission_id' => 'required|array',

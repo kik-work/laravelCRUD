@@ -12,85 +12,30 @@ use App\Http\Controllers\SmartphoneController;
 use App\Http\Controllers\UserController;
 use App\Models\Smartphone;
 
-Route::prefix('smartphones')->group(function () {
-
-    // API Resource
-    Route::apiResource('', SmartphoneController::class);
-
-    // Soft delete a smartphone
-    Route::delete('/soft-delete/{id}', function ($id) {
-        $phone = Smartphone::find($id);
-        if ($phone) {
-            $phone->delete();
-            return response()->json(["message" => "Smartphone $id soft deleted"]);
-        }
-        return response()->json(["message" => "Smartphone $id not found"], 404);
-    });
-
-    // Restore a soft deleted smartphone
-    Route::patch('/restore/{id}', function ($id) {
-        $phone = Smartphone::withTrashed()->find($id);
-        if ($phone) {
-            $phone->restore();
-            return response()->json(["message" => "Smartphone $id restored"]);
-        }
-        return response()->json(["message" => "Smartphone $id not found"], 404);
-    });
-    Route::get('/check-deleted', function () {
-        return Smartphone::withTrashed()->get();
-    });
-});
-
-
-
-
-// Route::get('/products', [ProductController::class, 'index']);
-// Route::get('/products/{id}', [ProductController::class, 'show']);
-// Route::post('/products', [ProductController::class, 'store']);
-// Route::put('/products/{id}', [ProductController::class, 'update']);
-// Route::patch('/products/{id}', [ProductController::class, 'update']);
-// Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-Route::get('/users/{user}/orders/{order}', function ($user, $order) {
-    return response()->json(compact('user', 'order'));
-});
-Route::get('/greet/{name?}', function ($name = 'kakon') {
-    return response()->json([
-        'message' => "Hello $name"
-    ]);
-});
-Route::get('/orders/{id}', function ($id) {
-    return $id;
-})->whereNumber('id');
-
-Route::prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-
-        Route::get('/users', function () {
-            return 'Admin users';
-        })->name('users.index');
-
-        Route::get('/kik', function () {
-            return 'khairul islam kakon';
-        })->name('kik.index');
-
-        Route::delete('/users/{id}', function ($id) {
-            return "Deleted user $id";
-        })->name('users.delete');
-    });
-Route::get('/test-route-name', function () {
-    return route('admin.users.index');
-});
-
-
-
-
 
 Route::prefix('v1')->group(function () {
-    //auth routes
+    //authentication parts
     Route::prefix('auth')->group(function () {
+        Route::post('/login', [LoginController::class, 'login'])->name('login.store');
         Route::post('/signup', [SignupController::class, 'register'])->name('auth.register');
+        Route::post('/logout', [UserController::class, 'logout'])->middleware('auth:sanctum')->name('auth.logout');
     });
+
+    //admin routes
+    Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+
+        Route::get('/admin', function () {
+            return 'Admin dashboard';
+        });
+
+        Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+        Route::post('/permissions', [PermissionController::class, 'store'])->name('rolespermissions.store');
+        Route::patch('/permission/{id}', [PermissionController::class, 'update'])->name('rolespermissions.update');
+        Route::post('/role/{role_id}/permissions/sync', [PermissionController::class, 'syncwithoutdetach'])->name('rolespermissions.sync');
+        Route::post('/role/{role_id}/permissions/detach', [PermissionController::class, 'detach'])->name('rolespermissions.detach');
+    });
+
+    //Role based access control
     Route::prefix('rbac')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/user/{user_id}', [UserController::class, 'show'])->name('user.show');
@@ -99,8 +44,36 @@ Route::prefix('v1')->group(function () {
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
         Route::post('/user/{user_id}/role/{role_id}/attach', [UserController::class, 'attachStoreRoles'])->name('attach.user.roles.store');
         Route::post('/user/{user_id}/role/{role_id}/detach', [UserController::class, 'detachStoreRoles'])->name('detach.user.roles.store');
-        Route::post('/user/{user_id}/role', [UserController::class, 'syncStoreRoles'])->name('sync.user.role.store');
+        Route::post('/user/{user_id}/role', [UserController::class, 'syncStoreRoles'])->name('sync.user.roles.store');
     });
+
+
+    //smartphone
+    Route::prefix('smartphones')->group(function () {
+        Route::apiResource('phones', SmartphoneController::class);
+
+        Route::delete('/soft-delete/{id}', function ($id) {
+            $phone = Smartphone::find($id);
+            if ($phone) {
+                $phone->delete();
+                return response()->json(["message" => "Smartphone $id soft deleted"]);
+            }
+            return response()->json(["message" => "Smartphone $id not found"], 404);
+        });
+        Route::patch('/restore/{id}', function ($id) {
+            $phone = Smartphone::withTrashed()->find($id);
+            if ($phone) {
+                $phone->restore();
+                return response()->json(["message" => "Smartphone $id restored"]);
+            }
+            return response()->json(["message" => "Smartphone $id not found"], 404);
+        });
+        Route::get('/check-deleted', function () {
+            return Smartphone::withTrashed()->get();
+        });
+    });
+
+
     //product routes
     Route::prefix('prod')->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('product.index');
@@ -121,24 +94,51 @@ Route::prefix('v1')->group(function () {
     });
 });
 
-// Public login route
 
-Route::post('/login', [LoginController::class, 'login'])->name('login.store');
 
-// Admin routes
-// Route::middleware(['auth', 'role:admin'])->group(function () {
-//     Route::get('/admin', function () {
-//         return 'Admin dashboard';
-//     });
+
+
+
+
+
+
+
+
+
+// Route::get('/products', [ProductController::class, 'index']);
+// Route::get('/products/{id}', [ProductController::class, 'show']);
+// Route::post('/products', [ProductController::class, 'store']);
+// Route::put('/products/{id}', [ProductController::class, 'update']);
+// Route::patch('/products/{id}', [ProductController::class, 'update']);
+// Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+// Route::get('/users/{user}/orders/{order}', function ($user, $order) {
+//     return response()->json(compact('user', 'order'));
 // });
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+// Route::get('/greet/{name?}', function ($name = 'kakon') {
+//     return response()->json([
+//         'message' => "Hello $name"
+//     ]);
+// });
+// Route::get('/orders/{id}', function ($id) {
+//     return $id;
+// })->whereNumber('id');
 
-    Route::get('/admin', function () {
-        return 'Admin dashboard';
-    });
-    Route::get('/permissions', [PermissionController::class, 'index'])->name('rolespermissions.index');
-    Route::post('/permissions', [PermissionController::class, 'store'])->name('rolespermissions.store');
-    Route::patch('/permission/{id}', [PermissionController::class, 'update'])->name('rolespermissions.update');
-    Route::post('/role/{role_id}/permissions/sync', [PermissionController::class, 'syncwithoutdetach'])->name('rolespermissions.sync');
-    Route::post('/role/{role_id}/permissions/detach', [PermissionController::class, 'detach'])->name('rolespermissions.detach');
-});
+// Route::prefix('admin')
+//     ->name('admin.')
+//     ->group(function () {
+
+//         Route::get('/users', function () {
+//             return 'Admin users';
+//         })->name('users.index');
+
+//         Route::get('/kik', function () {
+//             return 'khairul islam kakon';
+//         })->name('kik.index');
+
+//         Route::delete('/users/{id}', function ($id) {
+//             return "Deleted user $id";
+//         })->name('users.delete');
+//     });
+// Route::get('/test-route-name', function () {
+//     return route('admin.users.index');
+// });
