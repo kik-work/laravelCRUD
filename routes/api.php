@@ -16,40 +16,61 @@ use App\Models\Smartphone;
 Route::prefix('v1')->group(function () {
     //authentication parts
     Route::prefix('auth')->group(function () {
-        Route::post('/login', [LoginController::class, 'login'])->name('login.store');
+        Route::post('/login', [LoginController::class, 'login'])->name('auth.login.store');
         Route::post('/signup', [SignupController::class, 'register'])->name('auth.register');
         Route::post('/logout', [UserController::class, 'logout'])->middleware('auth:sanctum')->name('auth.logout');
     });
 
-    //admin routes
-    Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    //superAdmin routes
+    Route::prefix('sa')
+        ->middleware(['auth:sanctum', 'role:superadmin'])
+        ->group(function () {
+            Route::get('/users', [UserController::class, 'index'])->name('users.index');
+            //Role based access control
 
-        Route::get('/admin', function () {
-            return 'Admin dashboard';
+            Route::get('/user/{user_id}', [UserController::class, 'show'])->name('user.show');
+            Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+            Route::get('/role/{id}', [RoleController::class, 'show'])->name('roles.show');
+            Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+            Route::post('/user/{user_id}/role/{role_id}/attach', [UserController::class, 'attachStoreRoles'])->name('attach.user.roles.store');
+            Route::post('/user/{user_id}/role/{role_id}/detach', [UserController::class, 'detachStoreRoles'])->name('detach.user.roles.store');
+            Route::post('/user/{user_id}/role', [UserController::class, 'syncStoreRoles'])->name('sync.user.roles.store');
+            Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
+            Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
+            Route::patch('/permission/{id}', [PermissionController::class, 'update'])->name('permissions.update');
+            Route::post('/role/{role_id}/permissions/sync', [PermissionController::class, 'syncwithoutdetach'])->name('rolespermissions.sync');
+            Route::post('/role/{role_id}/permissions/detach', [PermissionController::class, 'detach'])->name('rolespermissions.detach');
         });
 
-        Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions.index');
-        Route::post('/permissions', [PermissionController::class, 'store'])->name('rolespermissions.store');
-        Route::patch('/permission/{id}', [PermissionController::class, 'update'])->name('rolespermissions.update');
-        Route::post('/role/{role_id}/permissions/sync', [PermissionController::class, 'syncwithoutdetach'])->name('rolespermissions.sync');
-        Route::post('/role/{role_id}/permissions/detach', [PermissionController::class, 'detach'])->name('rolespermissions.detach');
+    //admin routes
+    Route::prefix('admin')
+        ->middleware(['auth:sanctum', 'role:admin'])
+        ->group(function () {
+            Route::get('/dashboard', function () {
+                return 'Admin dashboard';
+            });
+        });
+    //blog routes
+    Route::prefix('blog')->group(function () {
+        Route::get('/posts', [PostController::class, 'index'])->name('post.index');
+        Route::get('/post/{id}', [PostController::class, 'show'])->name('post.show');
+        Route::post('/posts', [PostController::class, 'store'])->name('post.store');
+        Route::get('/comments', [CommentController::class, 'index'])->name('comment.index');
+        Route::post('/comments', [CommentController::class, 'store'])->name('comment.store');
+        Route::get('/comment/{id}', [CommentController::class, 'show'])->name('comment.show');
     });
 
-    //Role based access control
-    Route::prefix('rbac')->group(function () {
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::get('/user/{user_id}', [UserController::class, 'show'])->name('user.show');
-        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-        Route::get('/role/{id}', [RoleController::class, 'show'])->name('roles.show');
-        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-        Route::post('/user/{user_id}/role/{role_id}/attach', [UserController::class, 'attachStoreRoles'])->name('attach.user.roles.store');
-        Route::post('/user/{user_id}/role/{role_id}/detach', [UserController::class, 'detachStoreRoles'])->name('detach.user.roles.store');
-        Route::post('/user/{user_id}/role', [UserController::class, 'syncStoreRoles'])->name('sync.user.roles.store');
+    //product routes
+    Route::prefix('prod')->group(function () {
+        Route::get('/products', [ProductController::class, 'index'])->name('product.index');
+        Route::get('/products/{product}', [ProductController::class, 'show'])->name('product.show');
+        Route::post('/products', [ProductController::class, 'store'])->name('product.store');
+        Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('product.update');
+        Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('product.destory');
     });
-
-
+    
     //smartphone
-    Route::prefix('smartphones')->group(function () {
+    Route::prefix('smartphone')->group(function () {
         Route::apiResource('phones', SmartphoneController::class);
 
         Route::delete('/soft-delete/{id}', function ($id) {
@@ -71,26 +92,6 @@ Route::prefix('v1')->group(function () {
         Route::get('/check-deleted', function () {
             return Smartphone::withTrashed()->get();
         });
-    });
-
-
-    //product routes
-    Route::prefix('prod')->group(function () {
-        Route::get('/products', [ProductController::class, 'index'])->name('product.index');
-        Route::get('/products/{product}', [ProductController::class, 'show'])->name('product.show');
-        Route::post('/products', [ProductController::class, 'store'])->name('product.store');
-        Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('product.update');
-        Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('product.destory');
-    });
-
-    //blog routes
-    Route::prefix('blog')->group(function () {
-        Route::get('/posts', [PostController::class, 'index'])->name('post.index');
-        Route::get('/post/{id}', [PostController::class, 'show'])->name('post.show');
-        Route::post('/posts', [PostController::class, 'store'])->name('post.store');
-        Route::get('/comments', [CommentController::class, 'index'])->name('comment.index');
-        Route::post('/comments', [CommentController::class, 'store'])->name('comment.store');
-        Route::get('/comment/{id}', [CommentController::class, 'show'])->name('comment.show');
     });
 });
 

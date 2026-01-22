@@ -51,7 +51,7 @@ class UserController extends Controller
     public function syncStoreRoles(Request $request, $user_id)
     {
         $validated = $request->validate(
-            ['role_id' => 'required|integer|exists:roles,id']
+            ['role_id' => 'required|array|exists:roles,id']
         );
         $user = User::findOrFail($user_id);
         $user->roles()->sync($validated['role_id']);
