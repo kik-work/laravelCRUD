@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SmartphoneController;
 use App\Http\Controllers\UserController;
 use App\Models\Smartphone;
-
+use GuzzleHttp\Middleware;
 
 Route::prefix('v1')->group(function () {
     //authentication parts
@@ -22,7 +23,7 @@ Route::prefix('v1')->group(function () {
     });
 
     //superAdmin routes
-    Route::prefix('sa')
+    Route::prefix('super_admin')
         ->middleware(['auth:sanctum', 'role:superadmin'])
         ->group(function () {
             Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -40,6 +41,7 @@ Route::prefix('v1')->group(function () {
             Route::patch('/permission/{id}', [PermissionController::class, 'update'])->name('permissions.update');
             Route::post('/role/{role_id}/permissions/sync', [PermissionController::class, 'syncwithoutdetach'])->name('rolespermissions.sync');
             Route::post('/role/{role_id}/permissions/detach', [PermissionController::class, 'detach'])->name('rolespermissions.detach');
+            Route::get('/members', [MemberController::class, 'index'])->middleware('permission:view-member',);
         });
 
     //admin routes
@@ -68,7 +70,7 @@ Route::prefix('v1')->group(function () {
         Route::put('/products/{product_id}', [ProductController::class, 'update'])->name('product.update');
         Route::delete('/products/{product_id}', [ProductController::class, 'destroy'])->name('product.destory');
     });
-    
+
     //smartphone
     Route::prefix('smartphone')->group(function () {
         Route::apiResource('phones', SmartphoneController::class);
@@ -93,6 +95,14 @@ Route::prefix('v1')->group(function () {
             return Smartphone::withTrashed()->get();
         });
     });
+
+
+    //member
+    Route::prefix('members')
+        ->middleware(['auth:sanctum', 'role:member'])
+        ->group(function () {
+            Route::get('/member/{id}', [MemberController::class, 'show'])->name('member.show');
+        });
 });
 
 
