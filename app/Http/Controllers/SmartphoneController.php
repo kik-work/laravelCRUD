@@ -7,14 +7,50 @@ use Illuminate\Http\Request;
 
 class SmartphoneController extends Controller
 {
-    // Get all smartphones
-    public function index()
+    // Get all smartphones with pagination & filters
+    public function index(Request $request)
     {
-        $smartphone = Smartphone::with('user')->get();
+        $query = Smartphone::with('user');
+
+        // 🔎 Filtering
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->filled('brand')) {
+            $query->where('brand', 'like', '%' . $request->brand . '%');
+        }
+
+        if ($request->filled('ram')) {
+            $query->where('ram', $request->ram);
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // 📄 Pagination (default 10 per page)
+        $perPage = $request->get('per_page', 5);
+        $smartphones = $query->paginate($perPage);
+
         return response()->json([
             'success' => true,
             'message' => 'Phones data retrieved successfully',
-            'data' => $smartphone,
+            'data' => $smartphones->items(),
+            'pagination' => [
+                'current_page' => $smartphones->currentPage(),
+                'last_page' => $smartphones->lastPage(),
+                'per_page' => $smartphones->perPage(),
+                'total' => $smartphones->total(),
+            ]
         ], 200);
     }
 
