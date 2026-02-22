@@ -28,7 +28,7 @@ class SmartphoneController extends Controller
     {
 
         $validated = $request->validate([
-            'user_id'=> 'required|integer',
+            'user_id' => 'nullable|integer',
             'name' => 'required|string|max:255',
             'brand' => 'required|string|max:255',
             'ram' => 'required|integer',
