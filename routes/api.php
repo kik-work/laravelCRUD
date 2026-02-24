@@ -92,7 +92,9 @@ Route::prefix('v1')->group(function () {
             return response()->json(["message" => "Smartphone $id not found"], 404);
         });
         Route::get('/check-deleted', function () {
-            return Smartphone::withTrashed()->get();
+            return Smartphone::onlyTrashed()
+                ->orderBy('deleted_at', 'desc')
+                ->paginate(request('per_page', 10));
         });
     });
 
